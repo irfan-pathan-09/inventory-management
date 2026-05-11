@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cafe Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fdf6ee;
+      --surface: #fff9f3;
+      --card: #ffffff;
+      --border: #e8d9c5;
+      --accent: #c4722a;
+      --accent-light: #f5e8d8;
+      --accent2: #3d7a5c;
+      --danger: #c94040;
+      --warn: #e0963a;
+      --text: #2c1e10;
+      --muted: #8c6f52;
+      --shadow: 0 2px 16px rgba(196,114,42,0.08);
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--accent);
+      padding: 0 40px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 20px rgba(196,114,42,0.3);
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .logo span { opacity: 0.7; font-weight: 700; }
+
+    .header-sub {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.65);
+      margin-left: auto;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
+
+    /* Stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .stat-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; font-weight: 700; margin-top: 2px;
+    }
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.green { color: var(--accent2); }
+    .stat-value.warn { color: var(--warn); }
+    .stat-value.danger { color: var(--danger); }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--accent-light);
+      border-radius: 10px; padding: 4px;
+      width: fit-content;
+      margin-bottom: 24px;
+    }
+    .tab {
+      padding: 8px 18px; border-radius: 7px; border: none;
+      background: transparent; cursor: pointer;
+      font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 500;
+      color: var(--muted); transition: all 0.2s;
+    }
+    .tab.active { background: var(--card); color: var(--accent); font-weight: 600; box-shadow: var(--shadow); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Form */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; font-weight: 700;
+      margin-bottom: 22px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 14px; margin-bottom: 14px;
+    }
+    @media(max-width: 800px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+
+    .field label {
+      display: block; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .field input, .field select {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif; font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+
+    .btn {
+      padding: 10px 22px; border: none; border-radius: 10px;
+      font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.88rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #b3661e; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(196,114,42,0.35); }
+    .btn-secondary { background: var(--accent-light); color: var(--accent); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); }
+    .btn-green { background: var(--accent2); color: #fff; padding: 7px 14px; font-size: 0.8rem; }
+    .btn-green:hover { background: #31634a; }
+    .btn-warn { background: var(--warn); color: #fff; padding: 7px 14px; font-size: 0.8rem; }
+    .btn-warn:hover { background: #c77e28; }
+    .btn-danger { background: #fdf0f0; color: var(--danger); border: 1.5px solid #f5c6c6; padding: 7px 14px; font-size: 0.8rem; }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+    }
+    .filter-bar select, .filter-bar input {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 8px 14px;
+      color: var(--text); font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .filter-bar input { width: 200px; }
+    .filter-bar select:focus, .filter-bar input:focus { border-color: var(--accent); }
+
+    /* Item Cards Grid */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .item-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(196,114,42,0.14); }
+
+    .item-card.low-stock { border-color: #f5c6c6; }
+    .item-card.low-stock::before {
+      content: '⚠ Low Stock';
+      position: absolute; top: 12px; right: 12px;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.5px;
+      background: #fdf0f0; color: var(--danger); border-radius: 99px;
+      padding: 3px 8px;
+    }
+
+    .item-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+
+    .item-emoji {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: var(--accent-light); display: grid; place-items: center;
+      font-size: 1.5rem; flex-shrink: 0;
+    }
+
+    .item-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 700; margin-bottom: 3px;
+    }
+    .item-meta { font-size: 0.78rem; color: var(--muted); }
+
+    .qty-display {
+      display: flex; align-items: baseline; gap: 6px;
+      margin-bottom: 16px;
+    }
+    .qty-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem; font-weight: 900; color: var(--accent); line-height: 1;
+    }
+    .qty-unit { font-size: 0.85rem; color: var(--muted); font-weight: 500; }
+
+    .stock-bar-wrap {
+      background: var(--accent-light);
+      border-radius: 99px; height: 6px; margin-bottom: 16px; overflow: hidden;
+    }
+    .stock-bar { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+
+    .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .qty-input {
+      width: 60px; text-align: center;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 6px 8px;
+      font-size: 0.85rem; font-family: 'Outfit', sans-serif; color: var(--text);
+      outline: none;
+    }
+    .qty-input:focus { border-color: var(--accent); }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 14px 22px;
+      font-size: 0.85rem; z-index: 999; box-shadow: 0 8px 32px rgba(196,114,42,0.15);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.35s cubic-bezier(.22,1,.36,1);
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-left: 4px solid var(--accent2); }
+    #toast.error { border-left: 4px solid var(--danger); }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+      background: var(--card); border-radius: var(--radius); border: 1.5px dashed var(--border);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(44,30,16,0.5);
+      z-index: 200; display: none; place-items: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: grid; }
+    .modal {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 32px; width: 90%; max-width: 560px;
+      box-shadow: 0 20px 60px rgba(196,114,42,0.25);
+      animation: popIn 0.25s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; font-weight: 700; margin-bottom: 20px;
+    }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+
+    .category-chips {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .chip {
+      padding: 5px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: var(--card);
+      color: var(--muted); transition: all 0.2s;
+    }
+    .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .chip:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">☕ Brew<span>Track</span></div>
+  <div class="header-sub">Cafe Inventory Management System</div>
+</header>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-label">Total Items</div>
+      <div class="stat-value accent" id="statTotal">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-label">In Stock</div>
+      <div class="stat-value green" id="statInStock">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-label">Low Stock</div>
+      <div class="stat-value warn" id="statLow">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❌</div>
+      <div class="stat-label">Out of Stock</div>
+      <div class="stat-value danger" id="statOut">0</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('view')">📋 Inventory</button>
+    <button class="tab" onclick="switchTab('add')">➕ Add Item</button>
+  </div>
+
+  <!-- View Panel -->
+  <div class="panel active" id="panel-view">
+    <div class="filter-bar">
+      <input type="text" placeholder="🔍  Search items..." oninput="filterItems(this.value)" id="searchBox"/>
+      <select onchange="filterByCategory(this.value)" id="catFilter">
+        <option value="">All Categories</option>
+        <option>Beverages</option>
+        <option>Dairy</option>
+        <option>Dry Goods</option>
+        <option>Baked Goods</option>
+        <option>Sweeteners</option>
+        <option>Equipment</option>
+        <option>Other</option>
+      </select>
+      <select onchange="filterByStatus(this.value)" id="statusFilter">
+        <option value="">All Status</option>
+        <option value="low">Low Stock</option>
+        <option value="out">Out of Stock</option>
+      </select>
+    </div>
+    <div id="itemsGrid"><div class="empty-state"><div class="icon">📦</div><p>Loading inventory...</p></div></div>
+  </div>
+
+  <!-- Add Panel -->
+  <div class="panel" id="panel-add">
+    <div class="form-card">
+      <div class="form-title">🏪 Add New Item to Inventory</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Item Name</label>
+          <input type="text" id="iName" placeholder="e.g. Coffee Beans"/>
+        </div>
+        <div class="field">
+          <label>Quantity</label>
+          <input type="number" id="iQty" placeholder="50" min="0"/>
+        </div>
+        <div class="field">
+          <label>Unit</label>
+          <select id="iUnit">
+            <option>pcs</option><option>kg</option><option>g</option>
+            <option>L</option><option>ml</option><option>boxes</option>
+            <option>bags</option><option>bottles</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Min Stock Alert</label>
+          <input type="number" id="iMin" placeholder="10" min="0"/>
+        </div>
+        <div class="field">
+          <label>Price (₹)</label>
+          <input type="number" id="iPrice" placeholder="0" min="0" step="0.01"/>
+        </div>
+      </div>
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr; max-width: 500px;">
+        <div class="field">
+          <label>Category</label>
+          <select id="iCat">
+            <option>Beverages</option><option>Dairy</option><option>Dry Goods</option>
+            <option>Baked Goods</option><option>Sweeteners</option>
+            <option>Equipment</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Supplier</label>
+          <input type="text" id="iSupplier" placeholder="Supplier name"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addItem()">+ Add to Inventory</button>
+        <button class="btn btn-secondary" onclick="clearAddForm()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏️ Edit Item</h3>
+    <input type="hidden" id="editId"/>
+    <div class="modal-grid">
+      <div class="field"><label>Item Name</label><input type="text" id="eeName"/></div>
+      <div class="field"><label>Quantity</label><input type="number" id="eeQty" min="0"/></div>
+      <div class="field"><label>Unit</label>
+        <select id="eeUnit">
+          <option>pcs</option><option>kg</option><option>g</option>
+          <option>L</option><option>ml</option><option>boxes</option>
+          <option>bags</option><option>bottles</option>
+        </select>
+      </div>
+      <div class="field"><label>Category</label>
+        <select id="eeCat">
+          <option>Beverages</option><option>Dairy</option><option>Dry Goods</option>
+          <option>Baked Goods</option><option>Sweeteners</option>
+          <option>Equipment</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Min Stock Alert</label><input type="number" id="eeMin" min="0"/></div>
+      <div class="field"><label>Price (₹)</label><input type="number" id="eePrice" min="0" step="0.01"/></div>
+      <div class="field" style="grid-column: span 2;"><label>Supplier</label><input type="text" id="eeSupplier"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = '/api/items';
+  let allItems = [];
+  let searchQ = '', catQ = '', statusQ = '';
+
+  const EMOJI = {
+    'Beverages': '☕', 'Dairy': '🥛', 'Dry Goods': '🌾',
+    'Baked Goods': '🍞', 'Sweeteners': '🍯', 'Equipment': '🔧', 'Other': '📦'
+  };
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['view','add'][i] === tab));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+  }
+
+  async function fetchItems() {
+    try {
+      const res = await fetch(API);
+      const json = await res.json();
+      allItems = json.data || [];
+      applyFilters();
+      renderStats();
+    } catch(e) {
+      document.getElementById('itemsGrid').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>Could not connect to server.</p></div>`;
+    }
+  }
+
+  function renderStats() {
+    const low = allItems.filter(i => i.quantity > 0 && i.quantity <= i.minStock).length;
+    const out = allItems.filter(i => i.quantity === 0).length;
+    document.getElementById('statTotal').textContent = allItems.length;
+    document.getElementById('statInStock').textContent = allItems.filter(i => i.quantity > i.minStock).length;
+    document.getElementById('statLow').textContent = low;
+    document.getElementById('statOut').textContent = out;
+  }
+
+  function applyFilters() {
+    let data = allItems;
+    if (searchQ) data = data.filter(i => i.name.toLowerCase().includes(searchQ.toLowerCase()) || (i.supplier||'').toLowerCase().includes(searchQ.toLowerCase()));
+    if (catQ) data = data.filter(i => i.category === catQ);
+    if (statusQ === 'low') data = data.filter(i => i.quantity > 0 && i.quantity <= i.minStock);
+    if (statusQ === 'out') data = data.filter(i => i.quantity === 0);
+    renderGrid(data);
+  }
+
+  function renderGrid(data) {
+    if (!data.length) {
+      document.getElementById('itemsGrid').innerHTML = `<div class="empty-state"><div class="icon">📦</div><p>No items found.</p></div>`;
+      return;
+    }
+
+    document.getElementById('itemsGrid').innerHTML = `<div class="items-grid">${data.map(item => {
+      const isLow = item.quantity <= item.minStock && item.quantity > 0;
+      const isOut = item.quantity === 0;
+      const barPct = Math.min(100, (item.quantity / (item.minStock * 3)) * 100);
+      const barColor = isOut ? '#c94040' : isLow ? '#e0963a' : '#3d7a5c';
+      return `
+        <div class="item-card${isLow || isOut ? ' low-stock' : ''}">
+          <div class="item-top">
+            <div class="item-emoji">${EMOJI[item.category] || '📦'}</div>
+            <div>
+              <div class="item-name">${item.name}</div>
+              <div class="item-meta">${item.category} ${item.supplier ? '· ' + item.supplier : ''}</div>
+            </div>
+          </div>
+          <div class="qty-display">
+            <span class="qty-number">${item.quantity}</span>
+            <span class="qty-unit">${item.unit}</span>
+          </div>
+          <div class="stock-bar-wrap">
+            <div class="stock-bar" style="width:${barPct}%;background:${barColor}"></div>
+          </div>
+          <div class="card-actions">
+            <input type="number" class="qty-input" id="qty_${item._id}" value="1" min="1" title="Amount"/>
+            <button class="btn btn-green" onclick="restock('${item._id}')">+ Restock</button>
+            <button class="btn btn-warn" onclick="useItem('${item._id}')">− Use</button>
+            <button class="btn" style="background:rgba(124,106,255,0.1);color:#6a55ff;border:1px solid rgba(124,106,255,0.2);padding:7px 12px;font-size:0.8rem;" onclick="openEdit('${item._id}')">✏️</button>
+            <button class="btn btn-danger" onclick="deleteItem('${item._id}', '${item.name}')">🗑️</button>
+          </div>
+          ${item.price ? `<div style="margin-top:10px;font-size:0.78rem;color:var(--muted)">Price: ₹${item.price}/${item.unit}</div>` : ''}
+        </div>`;
+    }).join('')}</div>`;
+  }
+
+  function filterItems(q) { searchQ = q; applyFilters(); }
+  function filterByCategory(c) { catQ = c; applyFilters(); }
+  function filterByStatus(s) { statusQ = s; applyFilters(); }
+
+  async function addItem() {
+    const name = document.getElementById('iName').value.trim();
+    const quantity = parseFloat(document.getElementById('iQty').value);
+    const unit = document.getElementById('iUnit').value;
+    const category = document.getElementById('iCat').value;
+    const minStock = parseInt(document.getElementById('iMin').value) || 5;
+    const price = parseFloat(document.getElementById('iPrice').value) || 0;
+    const supplier = document.getElementById('iSupplier').value.trim();
+
+    if (!name || isNaN(quantity)) return showToast('Name and quantity are required', 'error');
+
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, quantity, unit, category, minStock, price, supplier })
+    });
+    const json = await res.json();
+    if (json.success) {
+      clearAddForm(); fetchItems(); showToast(`${name} added to inventory!`, 'success');
+      switchTab('view');
+    } else showToast(json.message, 'error');
+  }
+
+  function clearAddForm() {
+    ['iName','iQty','iMin','iPrice','iSupplier'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  async function restock(id) {
+    const amount = parseInt(document.getElementById(`qty_${id}`).value) || 1;
+    const res = await fetch(`${API}/${id}/restock`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount })
+    });
+    const json = await res.json();
+    if (json.success) { fetchItems(); showToast(`Restocked +${amount}`, 'success'); }
+    else showToast(json.message, 'error');
+  }
+
+  async function useItem(id) {
+    const amount = parseInt(document.getElementById(`qty_${id}`).value) || 1;
+    const res = await fetch(`${API}/${id}/use`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount })
+    });
+    const json = await res.json();
+    if (json.success) { fetchItems(); showToast(`Used ${amount} units`, 'success'); }
+    else showToast(json.message, 'error');
+  }
+
+  function openEdit(id) {
+    const d = allItems.find(i => i._id === id);
+    if (!d) return;
+    document.getElementById('editId').value = d._id;
+    document.getElementById('eeName').value = d.name;
+    document.getElementById('eeQty').value = d.quantity;
+    document.getElementById('eeUnit').value = d.unit;
+    document.getElementById('eeCat').value = d.category;
+    document.getElementById('eeMin').value = d.minStock;
+    document.getElementById('eePrice').value = d.price || 0;
+    document.getElementById('eeSupplier').value = d.supplier || '';
+    document.getElementById('editModal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('editModal').classList.remove('open'); }
+
+  async function saveEdit() {
+    const id = document.getElementById('editId').value;
+    const body = {
+      name: document.getElementById('eeName').value.trim(),
+      quantity: parseFloat(document.getElementById('eeQty').value),
+      unit: document.getElementById('eeUnit').value,
+      category: document.getElementById('eeCat').value,
+      minStock: parseInt(document.getElementById('eeMin').value) || 5,
+      price: parseFloat(document.getElementById('eePrice').value) || 0,
+      supplier: document.getElementById('eeSupplier').value.trim()
+    };
+    if (!body.name) return showToast('Name is required', 'error');
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const json = await res.json();
+    if (json.success) { closeModal(); fetchItems(); showToast('Item updated!', 'success'); }
+    else showToast(json.message, 'error');
+  }
+
+  async function deleteItem(id, name) {
+    if (!confirm(`Remove "${name}" from inventory?`)) return;
+    const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+    const json = await res.json();
+    if (json.success) { fetchItems(); showToast(`${name} removed`, 'success'); }
+    else showToast(json.message, 'error');
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+    t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 3000);
+  }
+
+  document.getElementById('editModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('editModal')) closeModal();
+  });
+
+  fetchItems();
+</script>
+</body>
+</html>
