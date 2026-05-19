@@ -25,7 +25,7 @@ mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('✅ Connected to MongoDB');
     app.listen(PORT, () => {
-      console.log(`🚀 Inventory Management running at http://localhost:${PORT}`);
+      console.log(`🚀 Inventory Management running at Port : ${PORT}`);
     });
   })
   .catch(err => {
