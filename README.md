@@ -1,4 +1,4 @@
-# Inventory Management
+# Inventory Management System
 
 Simple CRUD inventory management app built with Node.js and Express.
 
