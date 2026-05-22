@@ -2,7 +2,8 @@
 
 Simple CRUD inventory management app built with Node.js and Express.
 
-Live demo: https://web-production-dbc7e.up.railway.app/
+## Live demo of project:
+ https://web-production-dbc7e.up.railway.app/
 
 Features
 - View items
