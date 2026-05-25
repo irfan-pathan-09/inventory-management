@@ -10,6 +10,7 @@ Features
 - Add new items
 - Edit items
 - Delete items
+- stock modification
 
 Quick Start
 
